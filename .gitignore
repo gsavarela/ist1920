@@ -1,0 +1,9 @@
+# Remove python binaries
+*.pyc
+*__pycache__
+
+# Remove macos
+.DS_Store
+
+# Remove nested repositories
+dsl/pytorch-lecture/.git
