@@ -16,7 +16,8 @@ class KBandits(object):
 
         REFERENCE:
         ==========
-        Sutton et Barto,
+        Sutton & Barto 2018, Reinforcement Learning, 2nd Edition
+        Sections 2.3 - 2.7
     """
     def __init__(self, K):
         self.mu = np.random.randn(K)
@@ -72,31 +73,11 @@ class UCB(Greedy):
 
 
 if __name__ == '__main__':
-    K = 10
-    Q = KBandits(K)
-    best_reward = max(Q.mu)
-    best_action = (1 + np.argmax(Q.mu))
-    print("True means:", Q.mu)
-    print(f"""Best action: {best_action:d}
-              Best action's mean: {best_reward:f}""")
-
-    # Greedy policy
-    Q1 = Greedy(K, 0)
-    Q2 = Greedy(K, 5)
-
-    # Eps-Greedy policy
-    Q3 = EpsGreedy(K, 0, 0.1)
-    Q4 = EpsGreedy(K, 0, 0.01)
-
-    # UCB
-    Q5 = UCB(K, 1)
-
     # Perform 2000 independent runs
     # of 1000 steps each
     N = 1000
-    M = 1
+    M = 2000
     trials = np.arange(1, N + 1)
-    best_reward *= np.ones((N,), dtype=np.float)
 
     # rx hold the reward drawn at trial t
     r1 = np.zeros((M, N), dtype=np.float)
@@ -104,7 +85,7 @@ if __name__ == '__main__':
     r3 = np.zeros((M, N), dtype=np.float)
     r4 = np.zeros((M, N), dtype=np.float)
     r5 = np.zeros((M, N), dtype=np.float)
-    
+
     # ax hold the action
     a1 = np.zeros((M, N), dtype=np.int)
     a2 = np.zeros((M, N), dtype=np.int)
@@ -121,6 +102,28 @@ if __name__ == '__main__':
     f5 = np.zeros((M, N), dtype=np.float)
 
     for m in range(M):
+
+        K = 10
+        Q = KBandits(K)
+        best_reward = max(Q.mu)
+        best_action = (1 + np.argmax(Q.mu))
+        print(f"""Step: {m + 1:d}
+                  True means: {Q.mu:}""")
+        print(f"""Best action: {best_action:d}
+                  Best action's mean: {best_reward:f}""")
+
+        # Greedy policy
+        Q1 = Greedy(K, 0)
+        Q2 = Greedy(K, 5)
+
+        # Eps-Greedy policy
+        Q3 = EpsGreedy(K, 0, 0.1)
+        Q4 = EpsGreedy(K, 0, 0.01)
+
+        # UCB
+        Q5 = UCB(K, 1)
+
+        best_reward *= np.ones((N,), dtype=np.float)
         for t in trials:
             a1[m, t - 1] = Q1.a
             a2[m, t - 1] = Q2.a
@@ -140,11 +143,6 @@ if __name__ == '__main__':
             Q4.update(a4[m, t - 1], r4[m, t - 1])
             Q5.update(a5[m, t - 1], r5[m, t - 1])
 
-            # r1[m, t - 1] = np.max(Q1.mu)
-            # r2[m, t - 1] = np.max(Q2.mu)
-            # r3[m, t - 1] = np.max(Q3.mu)
-            # r4[m, t - 1] = np.max(Q4.mu)
-
             f1[m, t - 1] = int(a1[m, t - 1] == best_action)
             f2[m, t - 1] = int(a2[m, t - 1] == best_action)
             f3[m, t - 1] = int(a3[m, t - 1] == best_action)
@@ -153,16 +151,21 @@ if __name__ == '__main__':
 
     # Graph rewards
     fig, ax = plt.subplots()
-    ax.plot(trials, best_reward, color='g', label='Best mean')
-    ax.plot(trials, np.cumsum(r1[0, :]) / trials, color='r',
-            label=Q1.label)
-    ax.plot(trials, np.cumsum(r2[0, :]) / trials, color='b',
-            label=Q2.label)
-    ax.plot(trials, np.cumsum(r3[0, :]) / trials, color='r',
-            label=Q3.label, linestyle='dashed')
-    ax.plot(trials, np.cumsum(r4[0, :]) / trials, color='b',
-            label=Q4.label, linestyle='dashed')
-    ax.plot(trials, np.cumsum(r5[0, :]) / trials, color='c', label=Q5.label)
+    # ax.plot(trials, best_reward, color='g', label='Best mean')
+    ax.plot(trials, np.cumsum(np.mean(r1, axis=0)) / trials,
+            color='r', label=Q1.label)
+
+    ax.plot(trials, np.cumsum(np.mean(r2, axis=0)) / trials,
+            color='b', label=Q2.label)
+
+    ax.plot(trials, np.cumsum(np.mean(r3, axis=0)) / trials,
+            color='r', label=Q3.label, linestyle='dashed')
+
+    ax.plot(trials, np.cumsum(np.mean(r4, axis=0)) / trials,
+            color='b', label=Q4.label, linestyle='dashed')
+
+    ax.plot(trials, np.cumsum(np.mean(r5, axis=0)) / trials,
+            color='c', label=Q5.label)
 
     ax.set_xlabel('Steps')
     ax.set_ylabel('Average Reward')
@@ -174,20 +177,20 @@ if __name__ == '__main__':
 
     # Graph optimal actions proporsion
     fig, ax = plt.subplots()
-    ax.plot(trials, np.cumsum(f1[m, :]) / trials, color='r',
-            label=Q1.label)
+    ax.plot(trials, np.cumsum(np.mean(f1, axis=0)) / trials,
+            color='r', label=Q1.label)
 
-    ax.plot(trials, np.cumsum(f2[m, :]) / trials, color='b',
-            label=Q2.label)
+    ax.plot(trials, np.cumsum(np.mean(f2, axis=0)) / trials,
+            color='b', label=Q2.label)
 
-    ax.plot(trials, np.cumsum(f3[m, :]) / trials, color='r',
-            label=Q3.label, linestyle='dashed')
+    ax.plot(trials, np.cumsum(np.mean(f3, axis=0)) / trials,
+            color='r', label=Q3.label, linestyle='dashed')
 
-    ax.plot(trials, np.cumsum(f4[m, :]) / trials, color='b',
-            label=Q4.label, linestyle='dashed')
+    ax.plot(trials, np.cumsum(np.mean(f4, axis=0)) / trials,
+            color='b', label=Q4.label, linestyle='dashed')
 
-    ax.plot(trials, np.cumsum(f5[m, :]) / trials, color='c',
-            label=Q5.label)
+    ax.plot(trials, np.cumsum(np.mean(f5, axis=0)) / trials,
+            color='c', label=Q5.label)
 
     ax.set_xlabel('Steps')
     ax.set_ylabel('% Optimal Action')
