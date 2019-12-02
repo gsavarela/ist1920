@@ -58,12 +58,17 @@ class EpsGreedy(Greedy):
         return greedy_a
 
 
-class UCB(object):
-    def __init__(self):
-        pass
+class UCB(Greedy):
+    def __init__(self, K, value):
+        super(UCB, self).__init__(K, 0)
+        self.label = f'UCB {value:d}'
+        self.c = value
 
-    def action(self):
-        pass
+    @property
+    def a(self):
+        t = np.sum(self.steps)
+        ucb = self.mu + self.c * np.sqrt(np.log(t) / self.steps)
+        return np.argmax(ucb) + 1
 
 
 if __name__ == '__main__':
@@ -83,6 +88,9 @@ if __name__ == '__main__':
     Q3 = EpsGreedy(K, 0, 0.1)
     Q4 = EpsGreedy(K, 0, 0.01)
 
+    # UCB
+    Q5 = UCB(K, 1)
+
     # Perform 2000 independent runs
     # of 1000 steps each
     N = 1000
@@ -95,12 +103,14 @@ if __name__ == '__main__':
     r2 = np.zeros((M, N), dtype=np.float)
     r3 = np.zeros((M, N), dtype=np.float)
     r4 = np.zeros((M, N), dtype=np.float)
-
+    r5 = np.zeros((M, N), dtype=np.float)
+    
     # ax hold the action
     a1 = np.zeros((M, N), dtype=np.int)
     a2 = np.zeros((M, N), dtype=np.int)
     a3 = np.zeros((M, N), dtype=np.int)
     a4 = np.zeros((M, N), dtype=np.int)
+    a5 = np.zeros((M, N), dtype=np.int)
 
     # fx hold the frequency that the best
     # action is choosen at draw t
@@ -108,22 +118,27 @@ if __name__ == '__main__':
     f2 = np.zeros((M, N), dtype=np.float)
     f3 = np.zeros((M, N), dtype=np.float)
     f4 = np.zeros((M, N), dtype=np.float)
+    f5 = np.zeros((M, N), dtype=np.float)
+
     for m in range(M):
         for t in trials:
             a1[m, t - 1] = Q1.a
             a2[m, t - 1] = Q2.a
             a3[m, t - 1] = Q3.a
             a4[m, t - 1] = Q4.a
+            a5[m, t - 1] = Q5.a
 
             r1[m, t - 1] = Q(a1[m, t - 1])
             r2[m, t - 1] = Q(a2[m, t - 1])
             r3[m, t - 1] = Q(a3[m, t - 1])
             r4[m, t - 1] = Q(a4[m, t - 1])
+            r5[m, t - 1] = Q(a5[m, t - 1])
 
             Q1.update(a1[m, t - 1], r1[m, t - 1])
             Q2.update(a2[m, t - 1], r2[m, t - 1])
             Q3.update(a3[m, t - 1], r3[m, t - 1])
             Q4.update(a4[m, t - 1], r4[m, t - 1])
+            Q5.update(a5[m, t - 1], r5[m, t - 1])
 
             # r1[m, t - 1] = np.max(Q1.mu)
             # r2[m, t - 1] = np.max(Q2.mu)
@@ -134,6 +149,7 @@ if __name__ == '__main__':
             f2[m, t - 1] = int(a2[m, t - 1] == best_action)
             f3[m, t - 1] = int(a3[m, t - 1] == best_action)
             f4[m, t - 1] = int(a4[m, t - 1] == best_action)
+            f5[m, t - 1] = int(a5[m, t - 1] == best_action)
 
     # Graph rewards
     fig, ax = plt.subplots()
@@ -146,6 +162,8 @@ if __name__ == '__main__':
             label=Q3.label, linestyle='dashed')
     ax.plot(np.cumsum(r4[0, :]) / trials, color='b',
             label=Q4.label, linestyle='dashed')
+    ax.plot(np.cumsum(r5[0, :]) / trials, color='g',
+            label=Q5.label)
 
     ax.set_xlabel('Steps')
     ax.set_ylabel('Average Reward')
@@ -162,9 +180,14 @@ if __name__ == '__main__':
     ax.plot(trials, np.cumsum(f2[m, :]) / trials, color='b',
             label=Q2.label)
 
-    ax.plot(np.cumsum(f3[m, :]) / trials, color='r', label=Q3.label, linestyle='dashed')
+    ax.plot(np.cumsum(f3[m, :]) / trials, color='r',
+            label=Q3.label, linestyle='dashed')
 
-    ax.plot(np.cumsum(f4[m, :]) / trials, color='b', label=Q4.label, linestyle='dashed')
+    ax.plot(np.cumsum(f4[m, :]) / trials, color='b',
+            label=Q4.label, linestyle='dashed')
+
+    ax.plot(np.cumsum(f5[m, :]) / trials, color='g',
+            label=Q5.label)
 
     ax.set_xlabel('Iteration')
     ax.set_ylabel('Frequency')
