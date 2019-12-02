@@ -158,16 +158,16 @@ if __name__ == '__main__':
             label=Q1.label)
     ax.plot(trials, np.cumsum(r2[0, :]) / trials, color='b',
             label=Q2.label)
-    ax.plot(np.cumsum(r3[0, :]) / trials, color='r',
+    ax.plot(trials, np.cumsum(r3[0, :]) / trials, color='r',
             label=Q3.label, linestyle='dashed')
-    ax.plot(np.cumsum(r4[0, :]) / trials, color='b',
+    ax.plot(trials, np.cumsum(r4[0, :]) / trials, color='b',
             label=Q4.label, linestyle='dashed')
-    ax.plot(np.cumsum(r5[0, :]) / trials, color='g',
-            label=Q5.label)
+    ax.plot(trials, np.cumsum(r5[0, :]) / trials, color='c', label=Q5.label)
 
     ax.set_xlabel('Steps')
     ax.set_ylabel('Average Reward')
-    ax.set_title('10-Armed Bandit Policies Comparison')
+    ax.set_title(f'''10-Armed Bandit Policies Comparison 
+                 (RUNS={M:d})''')
     plt.legend()
     plt.show()
 
@@ -180,18 +180,19 @@ if __name__ == '__main__':
     ax.plot(trials, np.cumsum(f2[m, :]) / trials, color='b',
             label=Q2.label)
 
-    ax.plot(np.cumsum(f3[m, :]) / trials, color='r',
+    ax.plot(trials, np.cumsum(f3[m, :]) / trials, color='r',
             label=Q3.label, linestyle='dashed')
 
-    ax.plot(np.cumsum(f4[m, :]) / trials, color='b',
+    ax.plot(trials, np.cumsum(f4[m, :]) / trials, color='b',
             label=Q4.label, linestyle='dashed')
 
-    ax.plot(np.cumsum(f5[m, :]) / trials, color='g',
+    ax.plot(trials, np.cumsum(f5[m, :]) / trials, color='c',
             label=Q5.label)
 
-    ax.set_xlabel('Iteration')
-    ax.set_ylabel('Frequency')
-    ax.set_title('10-Armed Bandit Optimal Actions Proporsion')
+    ax.set_xlabel('Steps')
+    ax.set_ylabel('% Optimal Action')
+    ax.set_title(f'''10-Armed Bandit Optimal Actions Proporsion
+                     (RUNS={M:d})''')
     plt.legend()
     plt.show()
 
