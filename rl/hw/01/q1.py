@@ -112,18 +112,18 @@ if __name__ == '__main__':
         for t in trials:
             a1[m, t - 1] = Q1.a
             a2[m, t - 1] = Q2.a
-            # a3[m, t - 1] = Q3.a
-            # a4[m, t - 1] = Q4.a
-
+            a3[m, t - 1] = Q3.a
+            a4[m, t - 1] = Q4.a
 
             r1[m, t - 1] = Q(a1[m, t - 1])
             r2[m, t - 1] = Q(a2[m, t - 1])
+            r3[m, t - 1] = Q(a3[m, t - 1])
+            r4[m, t - 1] = Q(a4[m, t - 1])
 
             Q1.update(a1[m, t - 1], r1[m, t - 1])
             Q2.update(a2[m, t - 1], r2[m, t - 1])
-
-            # Q3.update(a3[m, t - 1], Q(a3[m, t - 1]))
-            # Q4.update(a4[m, t - 1], Q(a4[m, t - 1]))
+            Q3.update(a3[m, t - 1], r3[m, t - 1])
+            Q4.update(a4[m, t - 1], r4[m, t - 1])
 
             # r1[m, t - 1] = np.max(Q1.mu)
             # r2[m, t - 1] = np.max(Q2.mu)
@@ -132,8 +132,8 @@ if __name__ == '__main__':
 
             f1[m, t - 1] = int(a1[m, t - 1] == best_action)
             f2[m, t - 1] = int(a2[m, t - 1] == best_action)
-            # f3[m, t - 1] = int(a3[m, t - 1] == best_action)
-            # f4[m, t - 1] = int(a4[m, t - 1] == best_action)
+            f3[m, t - 1] = int(a3[m, t - 1] == best_action)
+            f4[m, t - 1] = int(a4[m, t - 1] == best_action)
 
     # Graph rewards
     fig, ax = plt.subplots()
@@ -142,10 +142,10 @@ if __name__ == '__main__':
             label=Q1.label)
     ax.plot(trials, np.cumsum(r2[0, :]) / trials, color='b',
             label=Q2.label)
-    # ax.plot(np.cumsum(r3) / trials, color='r',
-    #         label=Q3.label, linestyle='dashed')
-    # ax.plot(np.cumsum(r4) / trials, color='b',
-    #         label=Q4.label, linestyle='dashed')
+    ax.plot(np.cumsum(r3[0, :]) / trials, color='r',
+            label=Q3.label, linestyle='dashed')
+    ax.plot(np.cumsum(r4[0, :]) / trials, color='b',
+            label=Q4.label, linestyle='dashed')
 
     ax.set_xlabel('Steps')
     ax.set_ylabel('Average Reward')
@@ -162,11 +162,9 @@ if __name__ == '__main__':
     ax.plot(trials, np.cumsum(f2[m, :]) / trials, color='b',
             label=Q2.label)
 
-    # ax.plot(np.cumsum(a3) / trials, color='r',
-    #         label=Q3.label, linestyle='dashed')
+    ax.plot(np.cumsum(f3[m, :]) / trials, color='r', label=Q3.label, linestyle='dashed')
 
-    # ax.plot(np.cumsum(a4) / trials, color='b',
-    #         label=Q4.label, linestyle='dashed')
+    ax.plot(np.cumsum(f4[m, :]) / trials, color='b', label=Q4.label, linestyle='dashed')
 
     ax.set_xlabel('Iteration')
     ax.set_ylabel('Frequency')
