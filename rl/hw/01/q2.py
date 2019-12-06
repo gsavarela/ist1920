@@ -18,9 +18,16 @@ NS = GOAL - 1  # the states effectivelly visited by the agent
 NV = NS + 2    # NS + initial state (GAME-OVER) + terminal (PROFIT)
 
 if __name__ == '__main__':
-    VS = {}
-    V = np.zeros((NV,), dtype=np.float)
+
+    # States: that are effectevely visited by the agent
+    # S = (1, 2, 3, ..., 99)
     S = np.arange(1, NS + 1)
+    # Value: # states + "2 special states"
+    # V[0] = 0 --> RUIN, V[GOAL] = 1 --> PROFIT
+    # V = (0, 1, 2, ..., 99, 100)
+    V = np.zeros((NV,), dtype=np.float)
+    VS = {}
+    # Policies: same number of states
     PI = np.zeros((NS,), dtype=np.int)
     sweeps = 0
     delta = 1
@@ -37,24 +44,28 @@ if __name__ == '__main__':
             E = [P_H * GAMMA * V[state + action] +
                  P_T * GAMMA * V[state - action]
                  for action in A]
-            V[state] = round(np.max(E), 4)
+            V[state] = np.max(E)
             PI[state - 1] = A[np.argmax(E)]
             delta = max(delta, np.abs(V[state] - v))
 
-            print(state, delta, state + PI[state - 1], v, V[state - 1])
         sweeps += 1
-        VS[sweeps] = V
+        VS[sweeps] = V.copy()
 
+
+    legends = ('Sweep 1', 'Sweep 3', f'Sweep {sweeps:02d}')
     _, ax = plt.subplots()
     ax.set_xlabel('state')
     ax.set_ylabel('V[state]')
-    ax.plot(S, VS[1][1:-1], 'b-', label='Sweep 1')
-    ax.plot(S, VS[2][1:-1], 'c-', label='Sweep 2')
-    ax.plot(S, VS[sweeps][1:-1], 'r-', label=f'Sweep {sweeps:02d}')
+    ax.plot(S, VS[1][1:-1], 'b-')
+    ax.plot(S, VS[3][1:-1], 'c-')
+    ax.plot(S, VS[sweeps][1:-1], 'r-')
+    plt.legend(legends)
+    plt.title('Gambler\'s Problem: Value Iteration (4 decimal)')
     plt.show()
 
     _, ax = plt.subplots()
     ax.set_xlabel('state')
     ax.set_ylabel('policy')
+    plt.title('Gambler\'s Problem: Optimal Policy (4 decimal)')
     ax.plot(S, PI, 'r-')
     plt.show()
