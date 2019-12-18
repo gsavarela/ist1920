@@ -17,6 +17,23 @@ P_T = 1 - P_H  # probability that a coin toss will comeout heads
 NS = GOAL - 1  # the states effectivelly visited by the agent
 NV = NS + 2    # NS + initial state (GAME-OVER) + terminal (PROFIT)
 
+def roundup(x, n=4):
+    """ Rounds up
+    
+    Parameters:
+    ----------
+    * x : float or array-like
+    * n : int
+
+    Returns:
+    --------
+    * y : float or array-like
+        same type as input
+
+    """
+
+    fct = np.power(10, n)
+    return np.ceil(x * fct) / fct
 
 if __name__ == '__main__':
     # States: that are effectevely visited by the agent
@@ -48,15 +65,19 @@ if __name__ == '__main__':
             A = np.arange(1, amax + 1)
 
             H = np.array([
-               R[state + action] + GAMMA * V[state + action]
+               roundup(R[state + action] + GAMMA * V[state + action])
                for action in A
-            ], dtype=np.float64)
+            ], dtype=np.float)
 
             T = np.array([
-               R[state - action] + GAMMA * V[state - action]
+               roundup(R[state - action] + GAMMA * V[state - action])
                for action in A
-            ], dtype=np.float64)
-            E = P_H * H + P_T * T
+            ], dtype=np.float)
+            E = roundup(P_H * H + P_T * T)
+            # if sweeps == 14 and state == 20:
+            #     import pdb
+            #     pdb.set_trace()
+
             V[state] = np.max(E)
             PI[state - 1] = A[np.argmax(E)]
             delta = max(delta, np.abs(V[state] - v))
@@ -81,6 +102,8 @@ if __name__ == '__main__':
     ax.set_ylabel('policy')
     plt.title('Gambler\'s Problem: Optimal Policy (4 decimal)')
 
+    # import pdb
+    # pdb.set_trace()
     ax.plot(S, PIs[1], 'b-')
     ax.plot(S, PIs[3], 'c-')
     ax.plot(S, PIs[sweeps], 'r-')

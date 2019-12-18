@@ -152,19 +152,34 @@ if __name__ == '__main__':
     # Graph rewards
     fig, ax = plt.subplots()
     # ax.plot(trials, best_reward, color='g', label='Best mean')
-    ax.plot(trials, np.cumsum(np.mean(r1, axis=0)) / trials,
+    # ax.plot(trials, np.cumsum(np.mean(r1, axis=0)) / trials,
+    #         color='r', label=Q1.label)
+
+    # ax.plot(trials, np.cumsum(np.mean(r2, axis=0)) / trials,
+    #         color='b', label=Q2.label)
+
+    # ax.plot(trials, np.cumsum(np.mean(r3, axis=0)) / trials,
+    #         color='r', label=Q3.label, linestyle='dashed')
+
+    # ax.plot(trials, np.cumsum(np.mean(r4, axis=0)) / trials,
+    #         color='b', label=Q4.label, linestyle='dashed')
+
+    # ax.plot(trials, np.cumsum(np.mean(r5, axis=0)) / trials,
+    #         color='c', label=Q5.label)
+
+    ax.plot(trials, np.mean(np.cumsum(r1, axis=1), axis=0) / trials,
             color='r', label=Q1.label)
 
-    ax.plot(trials, np.cumsum(np.mean(r2, axis=0)) / trials,
+    ax.plot(trials, np.mean(np.cumsum(r2, axis=1), axis=0) / trials,
             color='b', label=Q2.label)
 
-    ax.plot(trials, np.cumsum(np.mean(r3, axis=0)) / trials,
+    ax.plot(trials, np.mean(np.cumsum(r3, axis=1), axis=0) / trials,
             color='r', label=Q3.label, linestyle='dashed')
 
-    ax.plot(trials, np.cumsum(np.mean(r4, axis=0)) / trials,
+    ax.plot(trials, np.mean(np.cumsum(r4, axis=1), axis=0) / trials,
             color='b', label=Q4.label, linestyle='dashed')
 
-    ax.plot(trials, np.cumsum(np.mean(r5, axis=0)) / trials,
+    ax.plot(trials, np.mean(np.cumsum(r5, axis=1), axis=0) / trials,
             color='c', label=Q5.label)
 
     ax.set_xlabel('Steps')
