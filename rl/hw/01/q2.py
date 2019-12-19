@@ -9,13 +9,11 @@ import numpy as np
 import pdb
 from matplotlib import pyplot as plt
 
-THRESHOLD = 1e-10
+THRESHOLD = 1e-8
 GOAL = 100
 GAMMA = 1      # this is the discount factor
 P_H = 0.4      # probability that a coin toss will comeout heads
 P_T = 1 - P_H  # probability that a coin toss will comeout heads
-NS = GOAL - 1  # the states effectivelly visited by the agent
-NV = NS + 2    # NS + initial state (GAME-OVER) + terminal (PROFIT)
 
 def roundup(x, n=4):
     """ Rounds up
@@ -38,74 +36,73 @@ def roundup(x, n=4):
 if __name__ == '__main__':
     # States: that are effectevely visited by the agent
     # S = (1, 2, 3, ..., 99)
-    S = np.arange(1, NS + 1)
+    S = np.arange(1, GOAL)
     # Value: # states + "2 special states"
     # V = (0, 1, 2, ..., 99, 100)
-    # V = np.random.randn(NV)
-    V = np.zeros((NV,), dtype=np.float64)
-    # V[0] = 0 --> RUIN, V[GOAL] = 0 --> PROFIT
-    V[0], V[GOAL] = 0, 0
+    V = np.zeros((GOAL + 1,), dtype=np.float)
     # Rewards: always zero except on GOAL
-    R = np.zeros((NV,), dtype=np.float)
+    R = np.zeros((GOAL + 1,), dtype=np.float)
     R[GOAL] = 1
     # Policies: same number of states
-    PI = np.zeros((NS,), dtype=np.int)
+    PI = np.zeros((GOAL - 1,), dtype=np.int)
     sweeps = 0
     delta = 1
-
-    Vs = {}
-    PIs = {}
-    while delta > THRESHOLD:
+ 
+    sweeps_value = {1: None, 2: None, 3: None, 32: None}
+    sweeps_pi = {1: None, 2: None, 3: None, 32: None}
+    while delta > THRESHOLD or sweeps < 32:
         delta = 0
-        # Iterate forwards -- skipping terminal state
-        for i, state in enumerate(S):
+        # Iterate forwards
+        for state in S:
             v = V[state]
             # maximum bet to reach target
-            amax = min(state, GOAL - state)
-            A = np.arange(1, amax + 1)
+            max_stake = min(state, GOAL - state)
+            stakes = np.arange(1, max_stake + 1)
 
             H = np.array([
-               roundup(R[state + action] + GAMMA * V[state + action])
-               for action in A
+               R[state + stake] + GAMMA * V[state + stake]
+               for stake in stakes
             ], dtype=np.float)
 
             T = np.array([
-               roundup(R[state - action] + GAMMA * V[state - action])
-               for action in A
+               R[state - stake] + GAMMA * V[state - stake]
+               for stake in stakes
             ], dtype=np.float)
+
             E = roundup(P_H * H + P_T * T)
-            # if sweeps == 14 and state == 20:
-            #     import pdb
-            #     pdb.set_trace()
 
             V[state] = np.max(E)
-            PI[state - 1] = A[np.argmax(E)]
+            PI[state - 1] = stakes[np.argmax(E)]
             delta = max(delta, np.abs(V[state] - v))
 
         sweeps += 1
-        Vs[sweeps] = V.copy()
-        PIs[sweeps] = PI.copy()
+        if sweeps in sweeps_value:
+            sweeps_value[sweeps] = V.copy()
+            if sweeps == 32:
+                print(f'Sweeps {sweeps} {V}')
 
-    legends = ('Sweep 1', 'Sweep 3', f'Sweep {sweeps:02d}')
+        if sweeps in sweeps_pi:
+            sweeps_pi[sweeps] = PI.copy()
+            if sweeps == 32:
+                print(f'Sweeps {sweeps} {PI}')
+
+    legends = ('Sweep 1', 'Sweep 2', 'Sweep 3', f'Sweep {sweeps:02d}')
     _, ax = plt.subplots()
-    ax.set_xlabel('state')
-    ax.set_ylabel('V[state]')
-    ax.plot(S, Vs[1][1:-1], 'b-')
-    ax.plot(S, Vs[3][1:-1], 'c-')
-    ax.plot(S, Vs[sweeps][1:-1], 'r-')
+    ax.set_xlabel('Wealth\nState')
+    ax.set_ylabel('Win. Probability\nV[State]')
+    ax.plot(S, sweeps_value[1][1:-1], 'r-')
+    ax.plot(S, sweeps_value[2][1:-1], 'm-')
+    ax.plot(S, sweeps_value[3][1:-1], 'c-')
+    ax.plot(S, sweeps_value[sweeps][1:-1], 'b-')
     plt.legend(legends)
-    plt.title('Gambler\'s Problem: Value Iteration (4 decimal)')
+    plt.title('Gambler\'s Problem:\nWinning Probability')
     plt.show()
 
     _, ax = plt.subplots()
-    ax.set_xlabel('state')
-    ax.set_ylabel('policy')
-    plt.title('Gambler\'s Problem: Optimal Policy (4 decimal)')
+    ax.set_xlabel('Wealth\n(State)')
+    ax.set_ylabel('Stake\n(Policy)')
+    plt.title('Gambler\'s Problem:\nStakes')
 
-    # import pdb
-    # pdb.set_trace()
-    ax.plot(S, PIs[1], 'b-')
-    ax.plot(S, PIs[3], 'c-')
-    ax.plot(S, PIs[sweeps], 'r-')
-    plt.legend(legends)
+    ax.bar(range(1, GOAL), sweeps_pi[sweeps], width=1)
+    plt.legend((f'Sweeps {sweeps}',))
     plt.show()
