@@ -12,8 +12,8 @@ from matplotlib import pyplot as plt
 THRESHOLD = 1e-8
 GOAL = 100
 GAMMA = 1      # this is the discount factor
-P_H = 0.4      # probability that a coin toss will comeout heads
-P_T = 1 - P_H  # probability that a coin toss will comeout heads
+P_H = 0.4      # probability that a coin toss will be heads
+P_T = 1 - P_H  # probability that a coin toss will be tails
 
 def roundup(x, n=4):
     """ Rounds up
